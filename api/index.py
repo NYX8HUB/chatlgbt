@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from g4f.client import Client
-import json  # Importar para ajustar a serialização JSON
-import re  # Importar para usar expressões regulares
+import json  
+import re  
 
 app = Flask(__name__)
 
@@ -18,7 +18,7 @@ def chat():
         user_message = data['message']
 
     try:
-        # Configurar o cliente e enviar mensagem para o ChatGPT com personalização
+       
         client = Client()
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -28,13 +28,13 @@ def chat():
             ]
         )
 
-        # Verificar e extrair a resposta do modelo
+        
         chat_response = response.choices[0].message.content
 
-        # Remover as crases do início e do fim da resposta
+        
         chat_response = re.sub(r'^```|```$', '', chat_response)
 
-        # Retornar resposta JSON com UTF-8
+        
         return app.response_class(
             response=json.dumps({'response': chat_response}, ensure_ascii=False),
             mimetype='application/json'
