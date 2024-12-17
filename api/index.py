@@ -43,19 +43,23 @@ def chat():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
         
+
 @app.route('/images', methods=['GET'])
 def generate_image():
+   
     prompt = request.args.get('prompt')
     if not prompt:
         return jsonify({'error': 'O parâmetro "prompt" é obrigatório.'}), 400
 
     try:
+       
         client = Client()
         response = client.images.generate(
-            model="SDXL",  
-            prompt=prompt, 
-            response_format="url"  
+            model="SDXL", 
+            prompt=prompt,  
+            response_format="url" 
         )
+
 
         image_url = response.data[0].url
 
