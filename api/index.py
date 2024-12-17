@@ -55,7 +55,7 @@ def generate_image():
        
         client = Client()
         response = client.images.generate(
-            model="SDXL", 
+            model="flux", 
             prompt=prompt,  
             response_format="url" 
         )
