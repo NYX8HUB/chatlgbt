@@ -64,10 +64,10 @@ def lua():
 
         lua_response = response.choices[0].message.content
         
-        # Substituir \n por uma nova linha real
         lua_response = re.sub(r'\\n', '\n', lua_response)
-
-        # Retorna o conteúdo como raw (sem JSON)
+        lua_response = re.sub(r'^```|```$', '', lua_response)
+        lua_response = re.sub(r'\blua\b', '', lua_response, count=1)
+    
         return Response(lua_response, mimetype='text/plain')
 
     except Exception as e:
