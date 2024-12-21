@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from g4f.client import Client
 import json  
 import re  
@@ -29,10 +29,6 @@ def chat():
 
         chat_response = response.choices[0].message.content
         
-        # Substituir \\n por uma nova linha real (\n)
-        chat_response = re.sub(r'\\n', '\n', chat_response)
-
-        # Remover os delimitadores de código Lua (caso presentes)
         chat_response = re.sub(r'^```|```$', '', chat_response)
 
         return app.response_class(
@@ -42,7 +38,41 @@ def chat():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/lua', methods=['GET', 'POST'])
+def lua():
+    if request.method == 'GET':
+        user_message = request.args.get('message')
+        if not user_message:
+            return 'O parâmetro "message" é obrigatório.', 400
+    else:
+        data = request.get_json(force=True)
+        if not data or 'message' not in data:
+            return 'O parâmetro "message" é obrigatório.', 400
+        user_message = data['message']
+
+    try:
+        client = Client()
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are an AI assistant for a roblox script called Nyx Hub. You are called NYXBOT. Your main goal is to help create Luau scripts. You will not answer anything that isn't related to Luau scripting. You will keep your answers short and direct. You were made by the developers at Nyx Team. You will always embed any code in a Lua code block. You will always use the custom request function for HTTP requests unless explicitly told otherwise. Do not explain how to create a script the user requests, write it yourself then give the user your script. Make few comments in your scripts. If this is the only message in our conversation, reply with a quick, generic greeting. Don't write lua and ``` in the reply. Never reply in Spanish. Avoid putting NYXTEAM or NYXBOT or NYX in the luau code."},
+                {"role": "user", "content": user_message}
+            ]
+        )
+
+        lua_response = response.choices[0].message.content
         
+        # Substituir \n por uma nova linha real
+        lua_response = re.sub(r'\\n', '\n', lua_response)
+
+        # Retorna o conteúdo como raw (sem JSON)
+        return Response(lua_response, mimetype='text/plain')
+
+    except Exception as e:
+        return str(e), 500
+
 
 @app.route('/images', methods=['GET'])
 def generate_image():
@@ -64,6 +94,7 @@ def generate_image():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     print("Iniciando API do ChatGPT com G4F")
