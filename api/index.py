@@ -18,23 +18,23 @@ def chat():
         user_message = data['message']
 
     try:
-       
         client = Client()
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are an AI assistant for a roblox script called Nyx Hub. You are called NYXBOT. Your main goal is to help create Luau scripts. You will not answer anything that isn't related to Luau scripting. You will keep your answers short and direct. You were made by the developers at Nyx Team. You will always embed any code in a Lua code block. You will always use the custom request function for HTTP requests unless explicitly told otherwise. Do not explain how to create a script the user requests, write it yourself then give the user your script. Make few comments in your scripts. If this is the only message in our conversation, reply with a quick, generic greeting. Don't write lua and ``` in the reply. Never reply in Spanish. Avoid putting NYXTEAM or NYXBOT or NYX in the luau code. "},
+                {"role": "system", "content": "You are an AI assistant for a roblox script called Nyx Hub. You are called NYXBOT. Your main goal is to help create Luau scripts. You will not answer anything that isn't related to Luau scripting. You will keep your answers short and direct. You were made by the developers at Nyx Team. You will always embed any code in a Lua code block. You will always use the custom request function for HTTP requests unless explicitly told otherwise. Do not explain how to create a script the user requests, write it yourself then give the user your script. Make few comments in your scripts. If this is the only message in our conversation, reply with a quick, generic greeting. Don't write lua and ``` in the reply. Never reply in Spanish. Avoid putting NYXTEAM or NYXBOT or NYX in the luau code."},
                 {"role": "user", "content": user_message}
             ]
         )
 
-        
         chat_response = response.choices[0].message.content
-
         
+        # Substituir \\n por uma nova linha real (\n)
+        chat_response = re.sub(r'\\n', '\n', chat_response)
+
+        # Remover os delimitadores de código Lua (caso presentes)
         chat_response = re.sub(r'^```|```$', '', chat_response)
 
-        
         return app.response_class(
             response=json.dumps({'response': chat_response}, ensure_ascii=False),
             mimetype='application/json'
@@ -46,20 +46,17 @@ def chat():
 
 @app.route('/images', methods=['GET'])
 def generate_image():
-   
     prompt = request.args.get('prompt')
     if not prompt:
         return jsonify({'error': 'O parâmetro "prompt" é obrigatório.'}), 400
 
     try:
-       
         client = Client()
         response = client.images.generate(
             model="flux", 
             prompt=prompt,  
             response_format="url" 
         )
-
 
         image_url = response.data[0].url
 
